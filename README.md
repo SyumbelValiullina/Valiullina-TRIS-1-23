@@ -14,3 +14,19 @@ npm install
 npm run dev
 
 Открыть адрес, который покажет терминал (обычно http://localhost:5173).
+
+## Запуск сервера (ASP.NET Core)
+
+Нужен .NET SDK 8 или новее.
+
+cd backend
+dotnet restore
+dotnet run
+
+- API: http://localhost:5000
+- Swagger: http://localhost:5000/swagger
+- Проверка живости: http://localhost:5000/health
+- Сведения о приложении: http://localhost:5000/info
+- Данные заявок пока в памяти, после перезапуска пропадут.
+- /health проверяет только доступность процесса (liveness), а не создание заявки.
+- Настоящее создание заявок появится в ЛР8.
