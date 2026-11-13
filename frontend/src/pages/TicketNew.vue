@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { addItem } from '../ticketsStore.js'
+import { createTicket, errorMessage } from '../api/tickets.js'
 
 const router = useRouter()
 
@@ -12,10 +12,12 @@ const form = ref({
 })
 
 const error = ref('')
+const isSubmitting = ref(false)
 
-function onCreate() {
+async function onCreate() {
+  if (isSubmitting.value) return
+
   const title = form.value.title.trim()
-
   if (title.length < 5 || title.length > 80) {
     error.value = 'Тема: от 5 до 80 символов'
     return
@@ -30,11 +32,21 @@ function onCreate() {
     return
   }
 
-  addItem(title, form.value.categoryId, description)
-
+  isSubmitting.value = true
   error.value = ''
-  form.value = { title: '', categoryId: 0, description: '' }
-  router.push('/')
+  try {
+    await createTicket({
+      title,
+      categoryId: form.value.categoryId,
+      description
+    })
+    form.value = { title: '', categoryId: 0, description: '' }
+    router.push('/')
+  } catch (err) {
+    error.value = errorMessage(err)
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>
 
@@ -53,7 +65,9 @@ function onCreate() {
 
       <p v-if="error" style="color: red">{{ error }}</p>
 
-      <button type="submit">Создать</button>
+      <button type="submit" :disabled="isSubmitting">
+        {{ isSubmitting ? 'Создаём…' : 'Создать' }}
+      </button>
     </form>
   </main>
 </template>
